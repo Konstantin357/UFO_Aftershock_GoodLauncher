@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "UFO_Aftershock_GoodLauncher": {
+      "commandName": "Project",
+      "commandLineArgs": "--option fullscreen=FALSE"
+    }
+  }
+}
