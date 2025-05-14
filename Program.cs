@@ -1,20 +1,43 @@
-﻿using System.Reflection;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
+
+//Pseudo enum
+const uint GameNone = 0;
+const uint GameMath = 1;
+const uint GameShock = 2;
+const uint GameLight = 3;
 
 [DllImport("kernel32", SetLastError = true)]
 static extern IntPtr LoadLibrary(string lpFileName);
 static void ExtractEmbeddedResource(string resourceName, string outputPath)
 {
-    Assembly assembly = Assembly.GetExecutingAssembly();
+    System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
     string[] names = assembly.GetManifestResourceNames();
-    using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
+    using var stream = assembly.GetManifestResourceStream(resourceName);
     if (stream == null) return;
     using var outFile = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
     stream.CopyTo(outFile);
 }
 
+static uint GetGameAppID(uint gameType)
+{
+    switch (gameType)
+    {
+        case GameNone:
+            return 480;
+        case GameMath:
+            return 292160;
+        case GameShock:
+            return 289500;
+        case GameLight:
+            return 237950;
+    }
+
+    return 480;
+}
+
 string nativeDllname = Environment.Is64BitProcess ? "steam_api64.dll" : "steam_api.dll";
-string txtName = "steam_appid.txt";
+const string txtName = "steam_appid.txt";
+const uint GameType = GameMath;
 
 // Extract to current directory
 ExtractEmbeddedResource("UFO_Aftershock_GoodLauncher." + nativeDllname, nativeDllname);
@@ -36,7 +59,7 @@ try
     if (Steamworks.SteamAPI.Init())
     {
         Console.WriteLine("Steamworks initialized successfully!");
-        const uint appID = 289500;
+        uint appID = GetGameAppID(GameType);
 
         Steamworks.AppId_t appID_t = new Steamworks.AppId_t(appID);
         bool isInstalled = Steamworks.SteamApps.BIsAppInstalled(appID_t);
